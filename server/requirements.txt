@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+google-generativeai
+requests
+dateparser
+python-dateutil
+mangum
