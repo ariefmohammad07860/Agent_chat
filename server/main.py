@@ -31,10 +31,10 @@ app = FastAPI()
 # Allow frontend to access backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://git-repo-status.onrender.com"],
+    allow_origins=["http://localhost:5173", "https://git-repo-status.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],    
+    allow_headers=["*"],
 )
 
 # Serve static frontend from 'dist'
@@ -151,6 +151,19 @@ def get_latest_commits(limit=5):
     return res.json(), None
 
 
+def get_branch_names():
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/branches"
+    res = requests.get(url, headers=headers)
+    if res.status_code != 200:
+        return None, f"GitHub API error: {res.status_code}"
+    branches = res.json()
+    return [b["name"] for b in branches], None
+
+
 @app.post("/query")
 async def get_response(query: Query):
     user_input = query.message.strip()
@@ -175,6 +188,14 @@ async def get_response(query: Query):
             now = datetime.datetime.now()
             formatted = now.strftime("%Y-%m-%d %H:%M:%S")
             return {"response": f"Current date and time is: {formatted}"}
+
+        if "branch" in lowered or "branches" in lowered:
+            branches, error = get_branch_names()
+            if error:
+                return {"response": f"Error fetching branches: {error}"}
+            if not branches:
+                return {"response": "No branches found."}
+            return {"response": f"Branches in `{GITHUB_REPO}`:\n- " + "\n- ".join(branches)}
 
         if "commit" in lowered and (
             "yesterday" in lowered

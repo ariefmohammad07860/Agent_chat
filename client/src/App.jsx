@@ -78,7 +78,7 @@ function App() {
                 key={index}
                 className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className="max-w-xs px-4 py-2 rounded-xl bg-gray-700 text-white">
+                <div className="max-w-[65%] break-words px-4 py-2 rounded-xl bg-gray-700 text-white">
                   {msg.isLoader ? (
                     <div className="loader mx-auto my-1">
                       <div></div>
